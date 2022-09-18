@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" packages="de.chojo.logutil.appender" strict="true">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <!--
+            <PatternLayout pattern="[%t] %m{nolookups} %n"/>
+            -->
+            <PatternLayout pattern="[%t] %m %n"/>
+        </Console>
+        <DiscordWebhook
+                name="DiscordWebhook"
+                url="URL"
+                ignoreExceptions="false"
+        />
+    </Appenders>
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="DiscordWebhook"/>
+        </Root>
+    </Loggers>
+</Configuration>

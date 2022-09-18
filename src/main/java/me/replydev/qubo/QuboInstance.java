@@ -10,6 +10,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import me.replydev.db.ServerRepository;
 import me.replydev.mcping.net.Check;
 import me.replydev.mcping.net.SimplePing;
 import me.replydev.utils.FileUtils;
@@ -25,11 +26,14 @@ public class QuboInstance
 	public final AtomicInteger currentThreads;
 	private final int[] COMMON_PORTS = { 25, 80, 443, 20, 21, 22, 23, 143, 3306, 3389, 53, 67, 68, 110 };
 	private long serverCount = 0;
+	private ServerRepository repository;
 
 	private ZonedDateTime start;
 
 	public QuboInstance(InputData inputData) 
 	{
+		this.repository = new ServerRepository();
+		repository.createTable();
 		this.inputData = inputData;
 		this.currentThreads = new AtomicInteger();
 		stop = false;
@@ -109,7 +113,7 @@ public class QuboInstance
 				{
 					currentThreads.incrementAndGet();
 					checkService.execute(
-							new Check(ip, port, inputData.getTimeout(), inputData.getFilename(), inputData.getCount(),
+							new Check(repository, ip, port, inputData.getTimeout(), inputData.getFilename(), inputData.getCount(),
 									this, inputData.getVersion(), inputData.getMotd(), inputData.getMinPlayer()));
 					inputData.getPortrange().next(); // va al successivo
 					serverCount++;
