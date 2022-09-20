@@ -4,3 +4,4 @@ services:
     build: .
     volumes:
       - ./dev.db:/app/dev.db
+    restart: unless-stopped
