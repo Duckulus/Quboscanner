@@ -14,6 +14,7 @@ import me.replydev.db.ServerRepository;
 import me.replydev.mcping.net.Check;
 import me.replydev.mcping.net.SimplePing;
 import me.replydev.utils.FileUtils;
+import me.replydev.utils.IpList;
 import me.replydev.utils.Log;
 
 public class QuboInstance 
@@ -30,10 +31,10 @@ public class QuboInstance
 
 	private ZonedDateTime start;
 
-	public QuboInstance(InputData inputData) 
+	public QuboInstance(InputData inputData, ServerRepository repository)
 	{
-		this.repository = new ServerRepository();
-		repository.createTable();
+		this.repository = repository;
+
 		this.inputData = inputData;
 		this.currentThreads = new AtomicInteger();
 		stop = false;
@@ -76,10 +77,15 @@ public class QuboInstance
 	private void checkServersExecutor() throws InterruptedException,NumberFormatException {
 		ExecutorService checkService = Executors.newFixedThreadPool(inputData.getThreads());
 		Log.logln("Checking Servers...");
+		Log.logln("Checking " + IpList.long2dotted(inputData.getIpList().getStart()) + "-" + IpList.long2dotted(inputData.getIpList().getEnd()));
 
 		while (inputData.getIpList().hasNext()) 
 		{
+
 			ip = inputData.getIpList().getNext();
+			if(IpList.host2long(ip)%600000==0) {
+				repository.createBackup(ip);
+			}
 			try 
 			{
 				InetAddress address = InetAddress.getByName(ip);

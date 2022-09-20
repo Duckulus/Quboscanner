@@ -1,6 +1,7 @@
 package me.replydev.qubo.gui;
 
 import com.intellij.uiDesigner.core.*;
+import me.replydev.db.ServerRepository;
 import me.replydev.qubo.Info;
 import me.replydev.qubo.InputData;
 import me.replydev.qubo.QuboInstance;
@@ -25,6 +26,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -65,7 +67,7 @@ public class MainWindow extends JFrame {
             InputData i;
 
             try {
-                i = new InputData(getArgsFromInputMask());
+                i = new InputData(getArgsFromInputMask(), Optional.empty());
             } catch (InvalidRangeException invalidRangeException) {
                 if (Confirm.requestConfirm("Check ip range and relaunch program, would you like to see an example configuration?"))
                     exampleConf();
@@ -159,7 +161,10 @@ public class MainWindow extends JFrame {
     }
 
     private void running(InputData i) {
-        quboInstance = new QuboInstance(i);
+        ServerRepository repository = new ServerRepository();
+        repository.createTable();
+        repository.createBackupTable();
+        quboInstance = new QuboInstance(i, repository);
         dtm.setRowCount(0);
         Info.serverFound = 0;
         Info.serverNotFilteredFound = 0;

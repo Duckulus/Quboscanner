@@ -1,5 +1,6 @@
 package me.replydev.qubo;
 
+import me.replydev.db.ServerRepository;
 import me.replydev.utils.FileUtils;
 import me.replydev.utils.KeyboardThread;
 import me.replydev.utils.Log;
@@ -11,6 +12,7 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -58,10 +60,15 @@ public class CLI {
 
 	private static void standardRun(String[] a)
 	{
+		ServerRepository repository = new ServerRepository();
+		repository.createTable();
+		repository.createBackupTable();
+		Optional<String> startHost = repository.loadLatestBackup();
+
 		InputData i;
 		try 
 		{
-			i = new InputData(a);
+			i = new InputData(a, startHost);
 		} 
 		catch (Exception e) 
 		{
@@ -69,7 +76,7 @@ public class CLI {
 			return;
 		}
 		Info.debugMode = i.isDebugMode();
-		quboInstance = new QuboInstance(i);
+		quboInstance = new QuboInstance(i,repository);
 		try{
 			quboInstance.run();
 		}catch (NumberFormatException e){
@@ -77,8 +84,14 @@ public class CLI {
 		}
 	}
 
-	private static void txtRun() 
+	private static void txtRun()
 	{
+
+		ServerRepository repository = new ServerRepository();
+		repository.createTable();
+		repository.createBackupTable();
+		Optional<String> startHost = repository.loadLatestBackup();
+
 		try 
 		{
 			BufferedReader reader = new BufferedReader(new FileReader("ranges.txt"));
@@ -93,7 +106,7 @@ public class CLI {
 				InputData i;
 				try 
 				{
-					i = new InputData(s.split(" "));
+					i = new InputData(s.split(" "), startHost);
 				}
 				catch (Exception e) 
 				{
@@ -102,7 +115,7 @@ public class CLI {
 					return;
 				}
 				
-				quboInstance = new QuboInstance(i);
+				quboInstance = new QuboInstance(i, repository);
 				Log.logln("Now running: " + quboInstance.getFilename());
 				quboInstance.run();
 			}

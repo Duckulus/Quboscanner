@@ -37,7 +37,15 @@ public class IpList {
         return data;
     }
 
-    private static long host2long(String host) {
+    public long getStart() {
+        return start;
+    }
+
+    public long getEnd() {
+        return end;
+    }
+
+    public static long host2long(String host) {
         long ip=0;
         if (!Character.isDigit(host.charAt(0))) return -1;
         int[] addr = ip2intarray(host);
@@ -63,7 +71,7 @@ public class IpList {
         return address;
     }
 
-    private static String long2dotted(long address) {
+    public static String long2dotted(long address) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0, shift = 24; i < 4; i++, shift -= 8) {
             long value = (address >> shift) & 0xff;
