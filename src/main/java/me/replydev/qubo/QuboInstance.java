@@ -85,6 +85,7 @@ public class QuboInstance
 			ip = inputData.getIpList().getNext();
 			if(IpList.host2long(ip)%600000==0) {
 				repository.createBackup(ip);
+				Log.logln("Created Backup at " + ip);
 			}
 			try 
 			{

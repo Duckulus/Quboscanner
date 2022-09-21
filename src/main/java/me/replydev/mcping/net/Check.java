@@ -9,6 +9,7 @@ import me.replydev.qubo.Info;
 import me.replydev.qubo.QuboInstance;
 import me.replydev.qubo.gui.MainWindow;
 import me.replydev.utils.FileUtils;
+import me.replydev.utils.IpList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.jmx.Server;
@@ -61,11 +62,13 @@ public class Check implements Runnable {
                     if (response == null) continue;
                     if (response.getDescription().contains(filterMotd) && response.getVersion().getName().contains(filterVersion) && response.getPlayers().getOnline() > minPlayer) {
                         String des = getGoodDescription(response.getDescription());
+                        double progress = (double) IpList.host2long(hostname) / IpList.host2long("255.255.255.255");
                         String dati = "-----------------------\n" + hostname + ":" + port +
                                 "\nVersion: " + response.getVersion().getName() + "\n" +
                                 "Online: " + response.getPlayers().getOnline() + "/" + response.getPlayers().getMax() + "\n" +
                                 "MOTD: " + des + "\n" +
-                                "Ping time: " + (System.currentTimeMillis() - time) + " ms";
+                                "Ping time: " + (System.currentTimeMillis() - time) + " ms\n" +
+                                "Progress: " + String.format("%,.2f", progress*100) + "%";
                         logger.info(dati);
                         repository.createServer(hostname, port, des, response);
                         String singleLine = "(" + hostname + ":" + port + ")(" + response.getPlayers().getOnline() + "/" + response.getPlayers().getMax() + ")" + "(" + response.getVersion().getName() + ")" + "(" + des + ")";
