@@ -18,7 +18,7 @@ public class ServerRepository {
     private Logger logger = LogManager.getLogManager().getLogger("DB");
 
     public ServerRepository() {
-        dataSource = SqlitePool.getHikarDatasource();
+        dataSource = PostgresPool.getHikarDatasource();
     }
 
     public void createTable() {

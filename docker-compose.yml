@@ -5,3 +5,22 @@ services:
     volumes:
       - ./dev.db:/app/dev.db
     restart: unless-stopped
+    depends_on:
+      - db
+  db:
+    container_name: db
+    image: postgres
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: server_db
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    depends_on:
+      - db
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - "5050:80"
