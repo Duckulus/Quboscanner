@@ -59,17 +59,8 @@ public class CLI {
         ServerRepository repository = new ServerRepository();
         repository.createTable();
         repository.createBackupTable();
-        int tries = 3;
-        Optional<String> startHost = Optional.empty();
-        while (tries >= 3) {
 
-            startHost = repository.loadLatestBackup();
-            if (startHost.isEmpty()) {
-                Thread.sleep(5000);
-                tries--;
-            }
-        }
-
+        Optional<String> startHost = repository.loadLatestBackup();
 
         InputData i;
         try {
