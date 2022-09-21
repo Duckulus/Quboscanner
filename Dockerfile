@@ -6,5 +6,7 @@ COPY . .
 
 RUN mvn clean compile assembly:single
 
+RUN chmod +x ./run.sh
+
 CMD ["./run.sh"]
 

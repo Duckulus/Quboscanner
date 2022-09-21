@@ -2,6 +2,7 @@ package me.replydev.db;
 
 import com.zaxxer.hikari.HikariDataSource;
 import me.replydev.mcping.data.FinalResponse;
+import me.replydev.utils.Log;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -54,7 +55,9 @@ public class ServerRepository {
                 return Optional.of(resultSet.getString("host"));
             }
         } catch (SQLException e) {
-            return Optional.empty();
+            logger.warning(e.getMessage());
+            Log.logln(e.getMessage());
+            throw new RuntimeException(e);
         }
         return Optional.empty();
     }
