@@ -9,6 +9,8 @@ services:
       - db
   db:
     container_name: db
+    volumes:
+      - /var/opt/serverscanner/postgres-data:/var/lib/postgresql/data
     image: postgres
     environment:
       POSTGRES_USER: root
