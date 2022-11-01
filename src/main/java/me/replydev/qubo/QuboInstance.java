@@ -33,6 +33,7 @@ public class QuboInstance
 
 	public QuboInstance(InputData inputData, ServerRepository repository)
 	{
+		System.out.println(inputData.getIpList());
 		this.repository = repository;
 
 		this.inputData = inputData;

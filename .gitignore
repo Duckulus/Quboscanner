@@ -7,3 +7,5 @@ outputs/
 *.txt
 *.json
 /src/test/
+pgdata
+dev.db

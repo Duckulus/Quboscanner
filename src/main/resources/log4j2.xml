@@ -9,7 +9,7 @@
         </Console>
         <DiscordWebhook
                 name="DiscordWebhook"
-                url="https://discord.com/api/webhooks/1020949584354213918/eeY6wVFpq8VmqoWr784MvMzDkNtcnATIWGytaXAsTs0d0xjjYCoV377CA3nWbZo18iDV"
+                url="https://discord.com/api/webhooks/1030738663455342622/JK5mVSp_him1yEBm63V0UPFlAYpAyFIovO-l4hDLdhEbDAA9hknqjiKnFYF7m3bTNFVf"
                 ignoreExceptions="false"
         />
     </Appenders>

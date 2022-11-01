@@ -8,8 +8,13 @@ import me.replydev.utils.IpList;
 import me.replydev.utils.PortList;
 import org.apache.commons.cli.*;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -17,6 +22,7 @@ public class InputData {
 
     private IpList ipList;
     private PortList portrange;
+    private IpList[] ipRanges;
 
 
     private CommandLine cmd;
@@ -28,7 +34,10 @@ public class InputData {
 
     private Options buildOptions() {
         Option iprange = new Option("range", "iprange", true, "The IP range that me.replydev.qubo will scan");
-        iprange.setRequired(true);
+
+        Option rangeFile = new Option("rangefile", "iprangefile", true, "File with multiple Ip Ranges");
+
+        Option backup = new Option("bu", "backup", false, "Wether to load backup from Database");
 
         Option portrange = new Option("ports", "portrange", true, "The range of ports that me.replydev.qubo will work on");
         portrange.setRequired(true);
@@ -68,6 +77,8 @@ public class InputData {
 
         Options options = new Options();
         options.addOption(iprange);
+        options.addOption(rangeFile);
+        options.addOption(backup);
         options.addOption(portrange);
         options.addOption(threads);
         options.addOption(timeout);
@@ -96,50 +107,82 @@ public class InputData {
         String ipStart = "", ipEnd = "";
         try {
             cmd = parser.parse(options, command);
-            try {
-                //Check for begin-end range first, first split the string
-                String[] beginEnd = cmd.getOptionValue("range").split("-");
 
-                //See if its length is 2 (begin-end)
-                if (beginEnd.length >= 2) {
-                    if (startHost.isPresent()) {
-                        ipStart = startHost.get();
-                    }else {
+            if (startHost.isPresent() && cmd.hasOption("bu")) {
+                ipStart = startHost.get();
+                ipEnd = "255.255.255.255";
+            } else if (cmd.hasOption("range")) {
+
+                try {
+                    //Check for begin-end range first, first split the string
+                    String[] beginEnd = cmd.getOptionValue("range").split("-");
+
+                    if (beginEnd.length >= 2) {   //See if its length is 2 (begin-end)
+
                         ipStart = cmd.getOptionValue("range").split("-")[0];
+                        ipEnd = cmd.getOptionValue("range").split("-")[1];
+
 
                     }
-                    ipEnd = cmd.getOptionValue("range").split("-")[1];
-                }
 
-                //Transform hostname into an IP
-                if (Objects.equals(ipStart, "")) {
-                    try {
-                        ipStart = InetAddress.getByName(cmd.getOptionValue("range")).getHostAddress();
-                        ipEnd = ipStart;
-                    } catch (UnknownHostException ignored) {
+                    //Transform hostname into an IP
+                    if (Objects.equals(ipStart, "")) {
+                        try {
+                            ipStart = InetAddress.getByName(cmd.getOptionValue("range")).getHostAddress();
+                            ipEnd = ipStart;
+                        } catch (UnknownHostException ignored) {
+                        }
+                    }
+
+                    //Checks if the string split are both IPs. If not, IPAddressString parses them as a CIDR or shorthand range.
+                    if (IpList.isNotIp(ipStart) || IpList.isNotIp(ipEnd)) {
+                        IPAddressSeqRange range = new IPAddressString(cmd.getOptionValue("range")).getSequentialRange();
+                        ipStart = range.getLower().toString();
+                        ipEnd = range.getUpper().toString();
+                    }
+                } catch (NullPointerException | IndexOutOfBoundsException e) {
+                    if (Info.gui) throw new InvalidRangeException();
+                    else {
+                        System.out.println("2");
+                        help();
                     }
                 }
-
-                //Checks if the string split are both IPs. If not, IPAddressString parses them as a CIDR or shorthand range.
-                if (IpList.isNotIp(ipStart) || IpList.isNotIp(ipEnd)) {
-                    IPAddressSeqRange range = new IPAddressString(cmd.getOptionValue("range")).getSequentialRange();
-                    ipStart = range.getLower().toString();
-                    ipEnd = range.getUpper().toString();
-                }
-            } catch (NullPointerException | IndexOutOfBoundsException e) {
-                if (Info.gui) throw new InvalidRangeException();
-                else help();
             }
 
             try {
-                ipList = new IpList(ipStart, ipEnd);
+                if (cmd.hasOption("rangefile")) {
+                    String rangeList = cmd.getOptionValue("rangefile");
+                    FileReader fileReader = new FileReader(rangeList);
+                    try (BufferedReader reader = new BufferedReader(fileReader)) {
+                        List<String> lines = new ArrayList<>();
+                        String line = null;
+                        while ((line = reader.readLine()) != null) {
+                            lines.add(line);
+                        }
+                        IpList[] ipLists = new IpList[lines.size()];
+                        final int[] index = {0};
+                        lines.forEach((s) -> {
+                            IPAddressSeqRange range = new IPAddressString(s).getSequentialRange();
+                            ipLists[index[0]] = new IpList(range.getLower().toString(), range.getUpper().toString());
+                            index[0]++;
+                        });
+                        ipRanges = ipLists;
+                    }
+                } else {
+                    ipList = new IpList(ipStart, ipEnd);
+                    ipRanges = new IpList[]{ipList};
+                }
+
             } catch (IllegalArgumentException e) {
                 throw new IllegalArgumentException(e.getMessage());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
             try {
                 portrange = new PortList(cmd.getOptionValue("ports"));
             } catch (NumberFormatException e) {
                 if (Info.gui) throw new NumberFormatException();
+                System.out.println("3");
                 help();
             }
 
@@ -212,5 +255,13 @@ public class InputData {
 
     public boolean isDebugMode() {
         return cmd.hasOption("debug");
+    }
+
+    public IpList[] getIpRanges() {
+        return ipRanges;
+    }
+
+    public void setIpList(IpList ipList) {
+        this.ipList = ipList;
     }
 }

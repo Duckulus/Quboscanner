@@ -2,6 +2,7 @@ package me.replydev.qubo;
 
 import me.replydev.db.ServerRepository;
 import me.replydev.utils.FileUtils;
+import me.replydev.utils.IpList;
 import me.replydev.utils.KeyboardThread;
 import me.replydev.utils.Log;
 import me.replydev.versionChecker.VersionChecker;
@@ -55,7 +56,7 @@ public class CLI {
                 "By @replydev on Telegram\nVersion " + Info.version + " " + Info.otherVersionInfo);
     }
 
-    private static void standardRun(String[] a) throws InterruptedException {
+    private static void standardRun(String[] a) {
         ServerRepository repository = new ServerRepository();
         repository.createTable();
         repository.createBackupTable();
@@ -70,12 +71,20 @@ public class CLI {
             return;
         }
         Info.debugMode = i.isDebugMode();
-        quboInstance = new QuboInstance(i, repository);
-        try {
-            quboInstance.run();
-        } catch (NumberFormatException e) {
-            quboInstance.inputData.help();
+        System.out.println(i.getIpRanges().length);
+        for (IpList ipRange : i.getIpRanges()) {
+            if(ipRange!=null) {
+                i.setIpList(ipRange);
+                quboInstance = new QuboInstance(i, repository);
+                try {
+                    quboInstance.run();
+                } catch (NumberFormatException e) {
+                    quboInstance.inputData.help();
+                }
+            }
+
         }
+
     }
 
     private static void txtRun() {

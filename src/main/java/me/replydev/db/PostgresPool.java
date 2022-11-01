@@ -25,7 +25,7 @@ public class PostgresPool {
         try (Connection conn = dataSource.getConnection()) {
             conn.isValid(5 * 1000);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            System.exit(1);
         }
         return dataSource;
     }
