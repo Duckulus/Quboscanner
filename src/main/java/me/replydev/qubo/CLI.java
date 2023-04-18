@@ -32,7 +32,7 @@ public class CLI {
             System.out.println("Put \"-Dfile.encoding=UTF-8\" in JVM args in order to run the program correctly!");
             System.exit(-1);
         }
-        VersionChecker.checkNewVersion();
+        //VersionChecker.checkNewVersion();
         FileUtils.createFolder("outputs");
         ExecutorService inputService = Executors.newSingleThreadExecutor();
         inputService.execute(new KeyboardThread());
@@ -53,7 +53,7 @@ public class CLI {
                 + "  \\___\\_\\\\__,_|_.__/ \\___/_____/ \\___\\__,_|_| |_|_| |_|\\___|_|   \n"
                 + "                                                                ");
         System.out.println(
-                "By @replydev on Telegram\nVersion " + Info.version + " " + Info.otherVersionInfo);
+                "By @replydev on Telegram\nFork by https://github.com/duckulus\nVersion " + Info.version + " " + Info.otherVersionInfo);
     }
 
     private static void standardRun(String[] a) {
